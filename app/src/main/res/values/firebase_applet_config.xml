@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <string name="firestore_database_id" translatable="false">ai-studio-android-c0253faa-d86a-4adf-b2c6-644a5bedfda8</string>
+    <string name="default_web_client_id" translatable="false">949119587946-webclient</string>
+</resources>

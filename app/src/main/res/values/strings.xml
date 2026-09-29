@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Kallesh AI Hub</string>
+    <string name="app_tagline">One AI Hub. Limitless Possibilities.</string>
+    <string name="app_subtitle">Your AI Hub for Chat, Images, Video, Voice, Music, Search, Maps &amp; Creativity</string>
+    <string name="founder_name">Kallesh MC</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="start_exploring">Start Exploring</string>
+    <string name="skip_intro">Skip Intro</string>
+    <string name="meet_the_founder">Meet the Founder</string>
+    <string name="upgrade_plan">Upgrade Plan</string>
+    <string name="new_chat">New Chat</string>
+    <string name="send_message">Send Message</string>
+</resources>

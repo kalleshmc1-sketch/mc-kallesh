@@ -1,0 +1,6 @@
+{
+  "name": "Kallesh AI Hub",
+  "description": "Your AI Hub for Chat, Images, Video, Voice, Music, Search, Maps, and Creativity",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

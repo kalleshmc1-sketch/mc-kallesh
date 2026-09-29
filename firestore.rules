@@ -1,0 +1,378 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Default-Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        ('email' in request.auth.token &&
+         'email_verified' in request.auth.token &&
+         request.auth.token.email == 'mckallesh14@gmail.com' &&
+         request.auth.token.email_verified == true)
+      );
+    }
+
+    // 2. Entity Validation Helpers
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+             data.email is string && data.email.size() <= 200 &&
+             (!('avatarUrl' in data) || data.avatarUrl == null || (data.avatarUrl is string && data.avatarUrl.size() <= 1000)) &&
+             data.plan is string && data.plan in ['FREE', 'PRO', 'PREMIUM'] &&
+             data.hasSeenFounderIntro is bool &&
+             data.memoryEnabled is bool &&
+             data.memorySummary is string && data.memorySummary.size() <= 4000 &&
+             data.preferredLanguage is string && data.preferredLanguage.size() >= 1 && data.preferredLanguage.size() <= 50 &&
+             data.responseStyle is string && data.responseStyle.size() >= 1 && data.responseStyle.size() <= 50 &&
+             data.defaultModel is string && data.defaultModel.size() >= 1 && data.defaultModel.size() <= 100 &&
+             data.themeMode is string && data.themeMode in ['DARK', 'LIGHT', 'SYSTEM'] &&
+             data.voiceEnabled is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidConversation(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.modelId is string && data.modelId.size() >= 1 && data.modelId.size() <= 100 &&
+             data.folder is string && data.folder.size() <= 80 &&
+             data.isPinned is bool &&
+             data.isShared is bool &&
+             data.shareId is string && data.shareId.size() <= 128 &&
+             data.lastMessagePreview is string && data.lastMessagePreview.size() <= 500 &&
+             data.messageCount is int && data.messageCount >= 0 && data.messageCount <= 100000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidChatMessage(data, convId) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.conversationId is string && data.conversationId == convId && data.conversationId.size() <= 128 &&
+             data.role is string && data.role in ['user', 'model'] &&
+             data.content is string && data.content.size() >= 1 && data.content.size() <= 50000 &&
+             data.modelId is string && data.modelId.size() <= 100 &&
+             data.feedback is string && data.feedback in ['NONE', 'LIKE', 'DISLIKE'] &&
+             data.citations is list && data.citations.size() <= 10 &&
+             (data.citations.size() == 0 || (data.citations[0] is string && data.citations[0].size() <= 500)) &&
+             data.attachmentName is string && data.attachmentName.size() <= 255 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidDailyUsage(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.dateKey is string && data.dateKey.size() == 10 &&
+             data.chatCount is int && data.chatCount >= 0 && data.chatCount <= 10000 &&
+             data.imageCount is int && data.imageCount >= 0 && data.imageCount <= 10000 &&
+             data.videoCount is int && data.videoCount >= 0 && data.videoCount <= 10000 &&
+             data.fileCount is int && data.fileCount >= 0 && data.fileCount <= 10000 &&
+             data.voiceCount is int && data.voiceCount >= 0 && data.voiceCount <= 10000 &&
+             data.musicCount is int && data.musicCount >= 0 && data.musicCount <= 10000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidWorkspaceItem(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.type is string && data.type in ['IMAGE', 'VIDEO', 'MUSIC', 'DOCUMENT', 'PROMPT', 'CODE', 'STUDY', 'WRITING'] &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.prompt is string && data.prompt.size() <= 10000 &&
+             data.content is string && data.content.size() <= 60000 &&
+             data.mediaData is string && data.mediaData.size() <= 200000 &&
+             data.aspectRatio is string && data.aspectRatio.size() <= 20 &&
+             data.status is string && data.status in ['QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED'] &&
+             data.category is string && data.category.size() <= 80 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidAppNotification(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.message is string && data.message.size() >= 1 && data.message.size() <= 2000 &&
+             data.type is string && data.type.size() >= 1 && data.type.size() <= 50 &&
+             data.isRead is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSystemConfig(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.description is string && data.description.size() >= 1 && data.description.size() <= 10000 &&
+             data.voiceName is string && data.voiceName.size() >= 1 && data.voiceName.size() <= 60 &&
+             data.language is string && data.language.size() >= 1 && data.language.size() <= 20 &&
+             data.audioEnabled is bool &&
+             data.showOnFirstLogin is bool &&
+             data.allowReplay is bool &&
+             data.announcement is string && data.announcement.size() <= 1000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // 3. Collection Rules
+
+    // Users Collection (PII Isolated strictly to owner or verified admin)
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'email', 'plan', 'hasSeenFounderIntro',
+                         'memoryEnabled', 'memorySummary', 'preferredLanguage', 'responseStyle',
+                         'defaultModel', 'themeMode', 'voiceEnabled', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'email', 'avatarUrl', 'plan', 'hasSeenFounderIntro',
+                         'memoryEnabled', 'memorySummary', 'preferredLanguage', 'responseStyle',
+                         'defaultModel', 'themeMode', 'voiceEnabled', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidUserProfile(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       request.auth.uid == userId &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt && (
+                         isAdmin() ||
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'displayName', 'avatarUrl', 'plan', 'hasSeenFounderIntro',
+                           'memoryEnabled', 'memorySummary', 'preferredLanguage', 'responseStyle',
+                           'defaultModel', 'themeMode', 'voiceEnabled', 'updatedAt'
+                         ])
+                       );
+
+      allow delete: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Conversations Collection
+    match /conversations/{conversationId} {
+      allow get: if isSignedIn() && isValidId(conversationId) && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(conversationId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'title', 'modelId', 'folder', 'isPinned', 'isShared',
+                         'shareId', 'lastMessagePreview', 'messageCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'title', 'modelId', 'folder', 'isPinned', 'isShared',
+                         'shareId', 'lastMessagePreview', 'messageCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidConversation(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(conversationId) &&
+                       isValidConversation(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt && (
+                         isAdmin() ||
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'title', 'modelId', 'folder', 'isPinned', 'isShared',
+                           'shareId', 'lastMessagePreview', 'messageCount', 'updatedAt'
+                         ])
+                       );
+
+      allow delete: if isSignedIn() && isValidId(conversationId) && resource.data.userId == request.auth.uid;
+
+      // Messages Subcollection (Denormalized userId for zero-latency local evaluation)
+      match /messages/{messageId} {
+        allow get: if isSignedIn() && isValidId(conversationId) && isValidId(messageId) && resource.data.userId == request.auth.uid;
+        allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+        allow create: if isSignedIn() &&
+                         isValidId(conversationId) &&
+                         isValidId(messageId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'conversationId', 'role', 'content', 'modelId',
+                           'feedback', 'citations', 'attachmentName', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'conversationId', 'role', 'content', 'modelId',
+                           'feedback', 'citations', 'attachmentName', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidChatMessage(incoming(), conversationId);
+
+        allow update: if isSignedIn() &&
+                         isValidId(conversationId) &&
+                         isValidId(messageId) &&
+                         isValidChatMessage(incoming(), conversationId) &&
+                         existing().userId == request.auth.uid &&
+                         incoming().userId == existing().userId &&
+                         incoming().conversationId == existing().conversationId &&
+                         incoming().createdAt == existing().createdAt && (
+                           isAdmin() ||
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'content', 'feedback', 'updatedAt'
+                           ])
+                         );
+
+        allow delete: if isSignedIn() && isValidId(conversationId) && isValidId(messageId) && resource.data.userId == request.auth.uid;
+      }
+    }
+
+    // Daily Usage Collection
+    match /usage/{usageId} {
+      allow get: if isSignedIn() && isValidId(usageId) && (
+        (resource == null && usageId.matches('^' + request.auth.uid + '_[0-9]{4}-[0-9]{2}-[0-9]{2}$')) ||
+        (resource != null && resource.data.userId == request.auth.uid)
+      );
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(usageId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'dateKey', 'chatCount', 'imageCount', 'videoCount',
+                         'fileCount', 'voiceCount', 'musicCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'dateKey', 'chatCount', 'imageCount', 'videoCount',
+                         'fileCount', 'voiceCount', 'musicCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidDailyUsage(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(usageId) &&
+                       isValidDailyUsage(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().dateKey == existing().dateKey &&
+                       incoming().createdAt == existing().createdAt && (
+                         isAdmin() ||
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'chatCount', 'imageCount', 'videoCount', 'fileCount',
+                           'voiceCount', 'musicCount', 'updatedAt'
+                         ])
+                       );
+
+      allow delete: if isSignedIn() && isValidId(usageId) && resource.data.userId == request.auth.uid;
+    }
+
+    // Personal AI Workspace & Studio Items Collection
+    match /workspace_items/{itemId} {
+      allow get: if isSignedIn() && isValidId(itemId) && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(itemId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'type', 'title', 'prompt', 'content', 'mediaData',
+                         'aspectRatio', 'status', 'category', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'type', 'title', 'prompt', 'content', 'mediaData',
+                         'aspectRatio', 'status', 'category', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidWorkspaceItem(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(itemId) &&
+                       isValidWorkspaceItem(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().type == existing().type &&
+                       incoming().createdAt == existing().createdAt && (
+                         isAdmin() ||
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'title', 'prompt', 'content', 'mediaData', 'status', 'category', 'updatedAt'
+                         ])
+                       );
+
+      allow delete: if isSignedIn() && isValidId(itemId) && resource.data.userId == request.auth.uid;
+    }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow get: if isSignedIn() && isValidId(notificationId) && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(notificationId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'title', 'message', 'type', 'isRead', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'title', 'message', 'type', 'isRead', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidAppNotification(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(notificationId) &&
+                       isValidAppNotification(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt && (
+                         isAdmin() ||
+                         incoming().diff(existing()).affectedKeys().hasOnly(['isRead', 'updatedAt'])
+                       );
+
+      allow delete: if isSignedIn() && isValidId(notificationId) && resource.data.userId == request.auth.uid;
+    }
+
+    // System Config Collection (Founder Introduction & Platform Announcements)
+    match /system_config/{configId} {
+      allow get: if isSignedIn() && isValidId(configId);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(configId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'title', 'description', 'voiceName', 'language',
+                         'audioEnabled', 'showOnFirstLogin', 'allowReplay', 'announcement',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'title', 'description', 'voiceName', 'language',
+                         'audioEnabled', 'showOnFirstLogin', 'allowReplay', 'announcement',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidSystemConfig(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(configId) &&
+                       isValidSystemConfig(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       (existing().userId == request.auth.uid || isAdmin()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'userId', 'title', 'description', 'voiceName', 'language',
+                         'audioEnabled', 'showOnFirstLogin', 'allowReplay', 'announcement', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(configId) && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+  }
+}

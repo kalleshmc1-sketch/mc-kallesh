@@ -1,0 +1,187 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user profile, personalization settings, subscription plan, AI memory, and first-login founder intro state.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "email": { "type": "string", "description": "User email address" },
+        "avatarUrl": { "type": "string", "description": "User profile photo URL" },
+        "plan": { "type": "string", "enum": ["FREE", "PRO", "PREMIUM"], "description": "Subscription tier" },
+        "hasSeenFounderIntro": { "type": "boolean", "description": "True after completing or skipping founder welcome experience" },
+        "memoryEnabled": { "type": "boolean", "description": "Whether personal AI memory is active" },
+        "memorySummary": { "type": "string", "description": "User-controlled AI memory context" },
+        "preferredLanguage": { "type": "string", "description": "Preferred UI and AI output language" },
+        "responseStyle": { "type": "string", "description": "Preferred AI tone/style" },
+        "defaultModel": { "type": "string", "description": "Default Gemini model alias" },
+        "themeMode": { "type": "string", "enum": ["DARK", "LIGHT", "SYSTEM"], "description": "UI theme preference" },
+        "voiceEnabled": { "type": "boolean", "description": "Whether automatic TTS playback is enabled in voice chat" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId", "displayName", "email", "plan", "hasSeenFounderIntro",
+        "memoryEnabled", "memorySummary", "preferredLanguage", "responseStyle",
+        "defaultModel", "themeMode", "voiceEnabled", "createdAt", "updatedAt"
+      ]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "A persistent multi-turn AI chat thread belonging to a user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "title": { "type": "string", "description": "Conversation title" },
+        "modelId": { "type": "string", "description": "Selected AI model identifier" },
+        "folder": { "type": "string", "description": "Folder category name" },
+        "isPinned": { "type": "boolean", "description": "Whether conversation is pinned" },
+        "isShared": { "type": "boolean", "description": "Whether share link is enabled" },
+        "shareId": { "type": "string", "description": "Public share identifier when shared" },
+        "lastMessagePreview": { "type": "string", "description": "Snippet of latest message for search and sidebar" },
+        "messageCount": { "type": "integer", "description": "Total messages in thread" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId", "title", "modelId", "folder", "isPinned", "isShared",
+        "shareId", "lastMessagePreview", "messageCount", "createdAt", "updatedAt"
+      ]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Individual message inside a conversation thread.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "conversationId": { "type": "string", "description": "Parent conversation ID" },
+        "role": { "type": "string", "enum": ["user", "model"], "description": "Message sender role" },
+        "content": { "type": "string", "description": "Markdown text content" },
+        "modelId": { "type": "string", "description": "AI model that generated the response" },
+        "feedback": { "type": "string", "enum": ["NONE", "LIKE", "DISLIKE"], "description": "User rating feedback" },
+        "citations": { "type": "array", "description": "Grounding web/maps source links (max 10)" },
+        "attachmentName": { "type": "string", "description": "Attached file or image name if any" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId", "conversationId", "role", "content", "modelId",
+        "feedback", "citations", "attachmentName", "createdAt", "updatedAt"
+      ]
+    },
+    "DailyUsage": {
+      "title": "DailyUsage",
+      "description": "Per-user daily usage counters for rate limiting across AI tools.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "dateKey": { "type": "string", "description": "Date string YYYY-MM-DD" },
+        "chatCount": { "type": "integer", "description": "Daily chat messages used" },
+        "imageCount": { "type": "integer", "description": "Daily image generations used" },
+        "videoCount": { "type": "integer", "description": "Daily video generations used" },
+        "fileCount": { "type": "integer", "description": "Daily file analyses used" },
+        "voiceCount": { "type": "integer", "description": "Daily voice interactions used" },
+        "musicCount": { "type": "integer", "description": "Daily music tracks generated" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId", "dateKey", "chatCount", "imageCount", "videoCount",
+        "fileCount", "voiceCount", "musicCount", "createdAt", "updatedAt"
+      ]
+    },
+    "WorkspaceItem": {
+      "title": "WorkspaceItem",
+      "description": "User workspace artifact (generated image, Veo video job, Lyria music, analyzed document, saved prompt, code snippet, study material, writing draft).",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "type": { "type": "string", "enum": ["IMAGE", "VIDEO", "MUSIC", "DOCUMENT", "PROMPT", "CODE", "STUDY", "WRITING"], "description": "Artifact type" },
+        "title": { "type": "string", "description": "Item title" },
+        "prompt": { "type": "string", "description": "Prompt or query used" },
+        "content": { "type": "string", "description": "Text output, code, analysis, or operation name" },
+        "mediaData": { "type": "string", "description": "Local file URI, thumbnail preview, or media reference" },
+        "aspectRatio": { "type": "string", "description": "Aspect ratio (1:1, 16:9, 9:16, 4:3)" },
+        "status": { "type": "string", "enum": ["QUEUED", "PROCESSING", "COMPLETED", "FAILED"], "description": "Processing status" },
+        "category": { "type": "string", "description": "Category tag or language" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId", "type", "title", "prompt", "content", "mediaData",
+        "aspectRatio", "status", "category", "createdAt", "updatedAt"
+      ]
+    },
+    "AppNotification": {
+      "title": "AppNotification",
+      "description": "In-app notification for completed AI jobs, usage alerts, and announcements.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "title": { "type": "string", "description": "Notification title" },
+        "message": { "type": "string", "description": "Notification body" },
+        "type": { "type": "string", "description": "Notification category" },
+        "isRead": { "type": "boolean", "description": "Read status" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId", "title", "message", "type", "isRead", "createdAt", "updatedAt"
+      ]
+    },
+    "SystemConfig": {
+      "title": "SystemConfig",
+      "description": "Admin-managed founder introduction and system announcement settings.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Author/Admin UID" },
+        "title": { "type": "string", "description": "Founder intro title" },
+        "description": { "type": "string", "description": "Founder intro script text" },
+        "voiceName": { "type": "string", "description": "TTS prebuilt voice name" },
+        "language": { "type": "string", "description": "Language code" },
+        "audioEnabled": { "type": "boolean", "description": "Whether TTS audio is enabled" },
+        "showOnFirstLogin": { "type": "boolean", "description": "Whether welcome modal appears on first login" },
+        "allowReplay": { "type": "boolean", "description": "Whether users can replay founder intro" },
+        "announcement": { "type": "string", "description": "System-wide announcement banner text" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": [
+        "userId", "title", "description", "voiceName", "language",
+        "audioEnabled", "showOnFirstLogin", "allowReplay", "announcement",
+        "createdAt", "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Per-user profile, settings, AI memory, subscription plan, and founder intro flag."
+    },
+    "/conversations/{conversationId}": {
+      "schema": { "$ref": "#/entities/Conversation" },
+      "description": "User chat conversations."
+    },
+    "/conversations/{conversationId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Messages belonging to a conversation."
+    },
+    "/usage/{usageId}": {
+      "schema": { "$ref": "#/entities/DailyUsage" },
+      "description": "Per-user daily usage tracking documents."
+    },
+    "/workspace_items/{itemId}": {
+      "schema": { "$ref": "#/entities/WorkspaceItem" },
+      "description": "User personal AI workspace items across Image, Video, Music, Document, Prompt, Code, Study, and Writing studios."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/AppNotification" },
+      "description": "In-app notifications per user."
+    },
+    "/system_config/{configId}": {
+      "schema": { "$ref": "#/entities/SystemConfig" },
+      "description": "Global founder introduction and platform settings managed by admin."
+    }
+  }
+}

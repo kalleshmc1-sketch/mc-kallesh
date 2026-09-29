@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+
+    <!-- Upper-Right Orbital Swoosh Ring around the Digital Brain -->
+    <path
+        android:pathData="M148,38 C178,40 198,62 195,92 C192,118 168,138 140,145 C164,134 182,114 184,90 C186,65 170,46 148,38 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="148"
+                android:startY="38"
+                android:endX="188"
+                android:endY="145"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF00E5FF" />
+                <item android:offset="0.55" android:color="#FF2979FF" />
+                <item android:offset="1.0" android:color="#FFAA00FF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Lower-Left Orbital Swoosh wrapping around the base of K -->
+    <path
+        android:pathData="M68,96 C50,115 44,136 54,150 C64,164 88,164 114,152 C90,157 68,154 61,142 C54,130 58,113 68,96 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="48"
+                android:startY="96"
+                android:endX="114"
+                android:endY="162"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF00E5FF" />
+                <item android:offset="1.0" android:color="#FF0088FF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 3D Ribbon Letter 'K' - Left Vertical Stem with Angled Top -->
+    <path
+        android:pathData="M72,48 L98,32 L98,174 L72,162 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="72"
+                android:startY="32"
+                android:endX="98"
+                android:endY="174"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF00E5FF" />
+                <item android:offset="0.6" android:color="#FF0091EA" />
+                <item android:offset="1.0" android:color="#FF2962FF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 3D Ribbon Letter 'K' - Lower Right Diagonal Leg -->
+    <path
+        android:pathData="M96,102 L118,96 L168,168 L138,168 L92,116 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="92"
+                android:startY="96"
+                android:endX="168"
+                android:endY="168"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF0091EA" />
+                <item android:offset="0.5" android:color="#FF651FFF" />
+                <item android:offset="1.0" android:color="#FFC51162" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 3D Ribbon Letter 'K' - Upper Right Diagonal Ribbon Fold -->
+    <path
+        android:pathData="M74,126 L132,38 L160,38 L98,118 C88,126 80,128 74,126 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="74"
+                android:startY="126"
+                android:endX="160"
+                android:endY="38"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF00B0FF" />
+                <item android:offset="0.5" android:color="#FF651FFF" />
+                <item android:offset="1.0" android:color="#FFD500F9" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Digital AI Brain (Nestled on the right between K's arms) -->
+    <!-- Left Hemisphere (Glowing Cyan) -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M153,66 C145,66 140,71 140,77 C136,79 134,84 136,89 C134,94 137,100 142,102 C142,107 147,111 153,111 L153,66 Z" />
+    <!-- Left Hemisphere Circuit Lines & Nodes -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M153,78 L145,78 L142,74 M153,90 L143,90 M153,100 L146,100 L144,104" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M142,74m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M142,90m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
+
+    <!-- Right Hemisphere (Glowing Violet-Magenta) -->
+    <path
+        android:strokeColor="#C51162"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M157,66 C165,66 170,71 170,77 C174,79 176,84 174,89 C176,94 173,100 168,102 C168,107 163,111 157,111 L157,66 Z" />
+    <!-- Right Hemisphere Circuit Lines & Nodes -->
+    <path
+        android:strokeColor="#D500F9"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M157,78 L165,78 L168,74 M157,90 L167,90 M157,100 L164,100 L166,104" />
+    <path
+        android:fillColor="#D500F9"
+        android:pathData="M168,74m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
+    <path
+        android:fillColor="#D500F9"
+        android:pathData="M168,90m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
+
+    <!-- Horizontal Accent Lines for '— AI HUB —' -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M46,204 L78,204" />
+    <path
+        android:strokeColor="#7C4DFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M162,204 L194,204" />
+</vector>
